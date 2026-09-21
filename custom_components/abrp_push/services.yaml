@@ -1,0 +1,10 @@
+push_now:
+  name: Push telemetry now
+  description: Immediately push the current sensor snapshot to ABRP.
+  fields:
+    entry_id:
+      name: Config entry ID
+      description: Optional. Limit the push to one config entry.
+    vehicle:
+      name: Vehicle name
+      description: Optional. Match the vehicle name configured in the integration.

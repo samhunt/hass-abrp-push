@@ -1,0 +1,13 @@
+{
+  "domain": "abrp_push",
+  "name": "ABRP Push",
+  "codeowners": ["@samhunt"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/samhunt/hass-abrp-push",
+  "integration_type": "service",
+  "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/samhunt/hass-abrp-push/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

@@ -1,0 +1,90 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ABRP vehicle credentials",
+        "description": "Add one vehicle. Use your Iternio telemetry API key and the ABRP Live Data user token for this car. Add the integration again for additional cars.",
+        "data": {
+          "vehicle_name": "Vehicle name",
+          "api_key": "Telemetry API key",
+          "user_token": "ABRP user token",
+          "car_model": "ABRP car model code (optional)",
+          "min_update_seconds": "Minimum seconds between pushes",
+          "max_stale_seconds": "Heartbeat interval when sensors are quiet (0 = off)"
+        }
+      },
+      "sensors": {
+        "title": "Map Home Assistant sensors",
+        "description": "SOC is required. Other fields are optional. Position can be a device_tracker with latitude/longitude attributes.",
+        "data": {
+          "soc_entity": "State of charge (%)",
+          "speed_entity": "Speed (km/h)",
+          "power_entity": "Power (kW, discharge positive)",
+          "position_entity": "Position (device_tracker)",
+          "latitude_entity": "Latitude",
+          "longitude_entity": "Longitude",
+          "charging_entity": "Charging",
+          "dcfc_entity": "DC fast charging",
+          "parked_entity": "Parked",
+          "ext_temp_entity": "Outside temperature (°C)",
+          "batt_temp_entity": "Battery temperature (°C)",
+          "odometer_entity": "Odometer (km)",
+          "range_entity": "Estimated range (km)",
+          "soh_entity": "State of health (%)",
+          "voltage_entity": "Pack voltage (V)",
+          "current_entity": "Pack current (A)",
+          "heading_entity": "Heading (°)",
+          "elevation_entity": "Elevation (m)",
+          "soh_fixed": "Fixed SOH (%)",
+          "capacity_fixed": "Usable capacity (kWh)"
+        }
+      }
+    },
+    "error": {
+      "invalid_credentials": "API key, user token, and vehicle name are required",
+      "soc_required": "Select a state of charge sensor"
+    },
+    "abort": {
+      "already_configured": "This ABRP user token is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "ABRP Push options",
+        "description": "Update credentials, intervals, or sensor mappings for this vehicle.",
+        "data": {
+          "vehicle_name": "Vehicle name",
+          "api_key": "Telemetry API key",
+          "user_token": "ABRP user token",
+          "car_model": "ABRP car model code (optional)",
+          "min_update_seconds": "Minimum seconds between pushes",
+          "max_stale_seconds": "Heartbeat interval when sensors are quiet (0 = off)",
+          "soc_entity": "State of charge (%)",
+          "speed_entity": "Speed (km/h)",
+          "power_entity": "Power (kW, discharge positive)",
+          "position_entity": "Position (device_tracker)",
+          "latitude_entity": "Latitude",
+          "longitude_entity": "Longitude",
+          "charging_entity": "Charging",
+          "dcfc_entity": "DC fast charging",
+          "parked_entity": "Parked",
+          "ext_temp_entity": "Outside temperature (°C)",
+          "batt_temp_entity": "Battery temperature (°C)",
+          "odometer_entity": "Odometer (km)",
+          "range_entity": "Estimated range (km)",
+          "soh_entity": "State of health (%)",
+          "voltage_entity": "Pack voltage (V)",
+          "current_entity": "Pack current (A)",
+          "heading_entity": "Heading (°)",
+          "elevation_entity": "Elevation (m)",
+          "soh_fixed": "Fixed SOH (%)",
+          "capacity_fixed": "Usable capacity (kWh)"
+        }
+      }
+    },
+    "error": {
+      "soc_required": "Select a state of charge sensor"
+    }
+  }
+}
