@@ -19,7 +19,7 @@
         "data": {
           "soc_entity": "State of charge (%)",
           "speed_entity": "Speed (km/h)",
-          "power_entity": "Power (kW, discharge positive)",
+          "power_entity": "Power (W or kW; sign from charging)",
           "position_entity": "Position (device_tracker)",
           "latitude_entity": "Latitude",
           "longitude_entity": "Longitude",
@@ -62,7 +62,7 @@
           "max_stale_seconds": "Heartbeat interval when sensors are quiet (0 = off)",
           "soc_entity": "State of charge (%)",
           "speed_entity": "Speed (km/h)",
-          "power_entity": "Power (kW, discharge positive)",
+          "power_entity": "Power (W or kW; sign from charging)",
           "position_entity": "Position (device_tracker)",
           "latitude_entity": "Latitude",
           "longitude_entity": "Longitude",

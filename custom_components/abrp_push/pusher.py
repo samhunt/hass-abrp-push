@@ -7,7 +7,11 @@ import time
 from datetime import datetime
 from typing import Any
 
-from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
+from homeassistant.const import (
+    ATTR_UNIT_OF_MEASUREMENT,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
+)
 from homeassistant.core import CALLBACK_TYPE, Event, HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_call_later, async_track_state_change_event
@@ -24,11 +28,13 @@ from .const import (
     CONF_API_KEY,
     CONF_CAPACITY_FIXED,
     CONF_CAR_MODEL,
+    CONF_CHARGING_ENTITY,
     CONF_LATITUDE_ENTITY,
     CONF_LONGITUDE_ENTITY,
     CONF_MAX_STALE_SECONDS,
     CONF_MIN_UPDATE_SECONDS,
     CONF_POSITION_ENTITY,
+    CONF_POWER_ENTITY,
     CONF_SOH_FIXED,
     CONF_USER_TOKEN,
     CONF_VEHICLE_NAME,
@@ -350,12 +356,19 @@ class AbrpPusher:
         tlm: dict[str, Any] = {"utc": int(time.time())}
 
         for conf_key, tlm_key in TLM_ENTITY_KEYS.items():
+            # Power is normalized separately (units + charging sign).
+            if conf_key == CONF_POWER_ENTITY:
+                continue
             entity_id = self._options.get(conf_key) or self._data.get(conf_key)
             if not entity_id:
                 continue
             value = self._read_entity(entity_id, boolean=tlm_key in BOOLEAN_TLM_KEYS)
             if value is not None:
                 tlm[tlm_key] = value
+
+        power = self._read_power_kw(is_charging=bool(tlm.get("is_charging")))
+        if power is not None:
+            tlm["power"] = power
 
         lat, lon = self._read_position()
         if lat is not None:
@@ -378,6 +391,57 @@ class AbrpPusher:
             tlm["capacity"] = float(capacity)
 
         return tlm
+
+    def _read_power_kw(self, *, is_charging: bool) -> float | None:
+        """Read power as kW with ABRP sign: discharge +, charge -."""
+        entity_id = self._options.get(CONF_POWER_ENTITY) or self._data.get(
+            CONF_POWER_ENTITY
+        )
+        if not entity_id:
+            return None
+
+        state = self.hass.states.get(entity_id)
+        if state is None or state.state in (STATE_UNAVAILABLE, STATE_UNKNOWN, None, ""):
+            return None
+
+        try:
+            raw = float(state.state)
+        except (TypeError, ValueError):
+            return None
+
+        unit = str(state.attributes.get(ATTR_UNIT_OF_MEASUREMENT) or "").strip()
+        power_kw = self._power_to_kw(raw, unit)
+
+        charging_entity = self._options.get(CONF_CHARGING_ENTITY) or self._data.get(
+            CONF_CHARGING_ENTITY
+        )
+        if charging_entity is not None:
+            # Prefer charging entity when mapped: magnitude from sensor, sign from charge state.
+            magnitude = abs(power_kw)
+            return -magnitude if is_charging else magnitude
+
+        # No charging sensor: keep the source sensor's sign after unit conversion.
+        return power_kw
+
+    @staticmethod
+    def _power_to_kw(value: float, unit: str) -> float:
+        """Convert a power reading to kilowatts using the sensor unit."""
+        normalized = unit.strip().lower().replace(" ", "")
+
+        if normalized in {"", "kw", "kilowatt", "kilowatts"}:
+            return value
+        if normalized in {"w", "watt", "watts"}:
+            return value * 0.001
+        if normalized in {"mw", "milliwatt", "milliwatts"}:
+            # Prefer milliwatts for ambiguous "mw" (EV sensors never report megawatts).
+            return value * 0.000001
+        if normalized in {"megawatt", "megawatts"} or unit.strip() == "MW":
+            return value * 1000.0
+
+        _LOGGER.debug(
+            "Unknown power unit %r on sensor; assuming kilowatts", unit or None
+        )
+        return value
 
     def _read_position(self) -> tuple[float | None, float | None]:
         position = self._options.get(CONF_POSITION_ENTITY) or self._data.get(CONF_POSITION_ENTITY)
